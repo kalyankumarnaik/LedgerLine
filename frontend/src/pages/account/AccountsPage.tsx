@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { accountService } from '../../services/accountService';
 import { Account } from '../../types';
 import { Card } from '../../components/ui/Card';
@@ -77,59 +78,72 @@ export const AccountsPage: React.FC = () => {
       </div>
 
       {/* Accounts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {accounts.map((acc) => (
-          <Card key={acc.id} className="relative flex flex-col justify-between hover:border-violet-300 dark:hover:border-navy-700 transition-all duration-200">
-            <div>
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-violet-brand">
-                    {acc.accountType}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ staggerChildren: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        {accounts.map((acc, index) => (
+          <motion.div
+            key={acc.id}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: index * 0.08 }}
+            whileHover={{ y: -4 }}
+          >
+            <Card className="relative flex flex-col justify-between hover:border-violet-400/80 dark:hover:border-violet-600/80 hover:shadow-fintech-lg transition-all duration-200 h-full">
+              <div>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-violet-brand">
+                      {acc.accountType}
+                    </span>
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+                      {acc.name}
+                    </h3>
+                    <span className="font-mono text-xs text-slate-400 block mt-1">
+                      {acc.accountNumber}
+                    </span>
+                  </div>
+                  <Badge status={acc.status} />
+                </div>
+
+                <div className="my-6">
+                  <span className="text-xs text-slate-400 block">Available Balance</span>
+                  <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                    ₹{acc.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                   </span>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-0.5">
-                    {acc.name}
-                  </h3>
-                  <span className="font-mono text-xs text-slate-400 block mt-1">
-                    {acc.accountNumber}
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-1">
+                    <ShieldCheck className="w-3.5 h-3.5" /> Reconciled & Invariant Checked
                   </span>
                 </div>
-                <Badge status={acc.status} />
               </div>
 
-              <div className="my-6">
-                <span className="text-xs text-slate-400 block">Available Balance</span>
-                <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                  ₹{acc.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                </span>
-                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 mt-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Reconciled & Invariant Checked
-                </span>
+              <div className="pt-4 border-t border-slate-100 dark:border-navy-800 space-y-2">
+                <div className="flex justify-between text-xs text-slate-500">
+                  <span>Daily Limit:</span>
+                  <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
+                    ₹{acc.dailyLimit?.toLocaleString('en-IN') || '100,000'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs text-slate-500">
+                  <span>Per-Txn Limit:</span>
+                  <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
+                    ₹{acc.perTransactionLimit?.toLocaleString('en-IN') || '50,000'}
+                  </span>
+                </div>
+                <Link to={`/accounts/${acc.id}`} className="block pt-2">
+                  <Button variant="outline" size="sm" className="w-full justify-between group">
+                    <span>View Details & Statements</span>
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </Button>
+                </Link>
               </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 dark:border-navy-800 space-y-2">
-              <div className="flex justify-between text-xs text-slate-500">
-                <span>Daily Limit:</span>
-                <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
-                  ₹{acc.dailyLimit?.toLocaleString('en-IN') || '100,000'}
-                </span>
-              </div>
-              <div className="flex justify-between text-xs text-slate-500">
-                <span>Per-Txn Limit:</span>
-                <span className="font-mono font-medium text-slate-700 dark:text-slate-300">
-                  ₹{acc.perTransactionLimit?.toLocaleString('en-IN') || '50,000'}
-                </span>
-              </div>
-              <Link to={`/accounts/${acc.id}`} className="block pt-2">
-                <Button variant="outline" size="sm" className="w-full justify-between">
-                  <span>View Details & Statements</span>
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </Link>
-            </div>
-          </Card>
+            </Card>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Modal for creating a new account */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Open New Financial Account">

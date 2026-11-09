@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { accountService } from '../../services/accountService';
 import { transactionService } from '../../services/transactionService';
 import { Account, Transaction } from '../../types';
@@ -77,7 +78,12 @@ export const WithdrawPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="max-w-2xl mx-auto space-y-6"
+    >
       <div>
         <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Withdraw Funds</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -173,6 +179,6 @@ export const WithdrawPage: React.FC = () => {
         onClose={() => setCompletedTx(null)}
         transaction={completedTx}
       />
-    </div>
+    </motion.div>
   );
 };

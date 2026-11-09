@@ -22,6 +22,31 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
     window.print();
   };
 
+  const handleDownload = () => {
+    const receiptContent = `================================================
+           LEDGERLINE PROVABLE RECEIPT
+================================================
+Reference:       ${transaction.transactionReference}
+Timestamp:       ${new Date(transaction.createdAt).toLocaleString()}
+Type:            ${transaction.transactionType}
+Amount:          ₹${transaction.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+Currency:        ${transaction.currency || 'INR'}
+Status:          ${transaction.status}
+From Account:    ${transaction.sourceAccountNumber || 'EXTERNAL CLEARING'}
+To Account:      ${transaction.destinationAccountNumber || 'EXTERNAL CLEARING'}
+Initiated By:    ${transaction.initiatedByUsername}
+Description:     ${transaction.description || 'N/A'}
+Core Invariant:  Double-entry balanced. Immutable journal record posted to LedgerLine core.
+================================================`;
+    const blob = new Blob([receiptContent], { type: 'text/plain;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `receipt-${transaction.transactionReference}.txt`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Transaction Receipt" maxWidth="max-w-md">
       <div id="printable-receipt" className="space-y-6">
@@ -85,12 +110,16 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-2 print:hidden">
-          <Button variant="outline" className="flex-1" onClick={handlePrint}>
-            <Printer className="w-4 h-4 mr-2" />
+        <div className="flex items-center gap-2 pt-2 print:hidden">
+          <Button variant="outline" size="sm" className="flex-1" onClick={handleDownload}>
+            <Download className="w-4 h-4 mr-1.5" />
+            Download
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1" onClick={handlePrint}>
+            <Printer className="w-4 h-4 mr-1.5" />
             Print
           </Button>
-          <Button variant="primary" className="flex-1" onClick={onClose}>
+          <Button variant="primary" size="sm" className="flex-1" onClick={onClose}>
             Done
           </Button>
         </div>

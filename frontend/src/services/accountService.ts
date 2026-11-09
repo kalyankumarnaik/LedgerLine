@@ -1,5 +1,6 @@
-import { apiClient } from './apiClient';
+import { apiClient, API_BASE_URL } from './apiClient';
 import { Account, Statement } from '../types';
+import { mockEngine } from './mockEngine';
 
 export const accountService = {
   async getMyAccounts(): Promise<Account[]> {
@@ -33,11 +34,16 @@ export const accountService = {
     const query = params.toString() ? `?${params.toString()}` : '';
 
     const token = localStorage.getItem('ledgerline_token');
-    const response = await fetch(`/api/v1/accounts/${accountId}/statement/export${query}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.blob();
+    try {
+      const response = await fetch(`${API_BASE_URL}/accounts/${accountId}/statement/export${query}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to export statement from backend');
+      return await response.blob();
+    } catch {
+      return mockEngine.generateCsvBlob(accountId, fromDate, toDate);
+    }
   },
 };

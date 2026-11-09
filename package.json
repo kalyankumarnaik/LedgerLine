@@ -1,0 +1,12 @@
+{
+  "name": "ledgerline",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LedgerLine - Immutable Double-Entry Core Financial Platform",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "dev": "cd frontend && npm run dev",
+    "start": "cd frontend && npm run preview",
+    "preview": "cd frontend && npm run preview"
+  }
+}

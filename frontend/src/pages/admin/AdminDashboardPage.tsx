@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { adminService } from '../../services/adminService';
 import { DashboardSummary } from '../../types';
 import { Card } from '../../components/ui/Card';
@@ -37,7 +38,12 @@ export const AdminDashboardPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-6"
+    >
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -63,37 +69,47 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-violet-100 dark:border-navy-800">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total System Liquidity</span>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-            ₹{(summary?.totalBalance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-          </div>
-          <span className="text-[11px] text-emerald-500 font-semibold mt-1 block">Includes Reserve Clearing</span>
-        </Card>
+        <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+          <Card className="relative overflow-hidden border-violet-200/80 dark:border-navy-800 hover:border-violet-400 dark:hover:border-violet-600 transition-all h-full">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl pointer-events-none" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total System Liquidity</span>
+            <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+              ₹{(summary?.totalBalance || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </div>
+            <span className="text-[11px] text-emerald-500 font-semibold mt-1 block">Includes Reserve Clearing</span>
+          </Card>
+        </motion.div>
 
-        <Card className="border-emerald-100 dark:border-navy-800">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Platform Inflow</span>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
-            ₹{(summary?.totalIncoming || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-          </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Deposits Funded</span>
-        </Card>
+        <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+          <Card className="relative overflow-hidden border-emerald-200/80 dark:border-navy-800 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all h-full">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Platform Inflow</span>
+            <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+              ₹{(summary?.totalIncoming || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </div>
+            <span className="text-[11px] text-slate-400 mt-1 block">Deposits Funded</span>
+          </Card>
+        </motion.div>
 
-        <Card className="border-slate-200 dark:border-navy-800">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Disbursements</span>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-            ₹{(summary?.totalOutgoing || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-          </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">Withdrawals Processed</span>
-        </Card>
+        <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+          <Card className="relative overflow-hidden border-slate-200 dark:border-navy-800 hover:border-slate-300 dark:hover:border-navy-700 transition-all h-full">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Disbursements</span>
+            <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+              ₹{(summary?.totalOutgoing || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+            </div>
+            <span className="text-[11px] text-slate-400 mt-1 block">Withdrawals Processed</span>
+          </Card>
+        </motion.div>
 
-        <Card className="border-slate-200 dark:border-navy-800">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Ledger Movements</span>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-            {summary?.totalTransfers || 0}
-          </div>
-          <span className="text-[11px] text-violet-500 font-semibold mt-1 block">Balanced Journal Entries</span>
-        </Card>
+        <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+          <Card className="relative overflow-hidden border-slate-200 dark:border-navy-800 hover:border-slate-300 dark:hover:border-navy-700 transition-all h-full">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Ledger Movements</span>
+            <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+              {summary?.totalTransfers || 0}
+            </div>
+            <span className="text-[11px] text-violet-500 font-semibold mt-1 block">Balanced Journal Entries</span>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Charts */}
@@ -166,6 +182,6 @@ export const AdminDashboardPage: React.FC = () => {
           </Card>
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 };

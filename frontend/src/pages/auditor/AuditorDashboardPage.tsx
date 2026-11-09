@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { auditorService } from '../../services/auditorService';
 import { ReconciliationReport } from '../../types';
 import { Card } from '../../components/ui/Card';
@@ -35,7 +36,12 @@ export const AuditorDashboardPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-6"
+    >
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -54,44 +60,50 @@ export const AuditorDashboardPage: React.FC = () => {
 
       {/* Audit Invariant Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-emerald-100 dark:border-navy-800">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Reconciliation Status</span>
-          <div className="flex items-center gap-2 mt-2">
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-            <span className="text-lg font-black text-slate-900 dark:text-white">
-              {report?.fullyReconciled ? 'Pass (100% Balanced)' : 'Discrepancy Detected'}
+        <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+          <Card className="border-emerald-200/80 dark:border-navy-800 hover:border-emerald-400 dark:hover:border-emerald-600 transition-all h-full">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Reconciliation Status</span>
+            <div className="flex items-center gap-2 mt-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              <span className="text-lg font-black text-slate-900 dark:text-white">
+                {report?.fullyReconciled ? 'Pass (100% Balanced)' : 'Discrepancy Detected'}
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              {report?.balancedAccountsCount || 0} / {report?.totalAccountsChecked || 0} Accounts Reconciled
             </span>
-          </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">
-            {report?.balancedAccountsCount || 0} / {report?.totalAccountsChecked || 0} Accounts Reconciled
-          </span>
-        </Card>
+          </Card>
+        </motion.div>
 
-        <Card className="border-violet-100 dark:border-navy-800">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Journal Parity</span>
-          <div className="flex items-center gap-2 mt-2">
-            <Scale className="w-5 h-5 text-violet-500" />
-            <span className="text-lg font-black text-slate-900 dark:text-white">
-              Zero Imbalance
+        <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+          <Card className="border-violet-200/80 dark:border-navy-800 hover:border-violet-400 dark:hover:border-violet-600 transition-all h-full">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Journal Parity</span>
+            <div className="flex items-center gap-2 mt-2">
+              <Scale className="w-5 h-5 text-violet-500" />
+              <span className="text-lg font-black text-slate-900 dark:text-white">
+                Zero Imbalance
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              {report?.balancedJournalEntriesCount || 0} Balanced Double-Entries
             </span>
-          </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">
-            {report?.balancedJournalEntriesCount || 0} Balanced Double-Entries
-          </span>
-        </Card>
+          </Card>
+        </motion.div>
 
-        <Card className="border-slate-200 dark:border-navy-800">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Immutability Protection</span>
-          <div className="flex items-center gap-2 mt-2">
-            <Lock className="w-5 h-5 text-blue-500" />
-            <span className="text-lg font-black text-slate-900 dark:text-white">
-              Database Enforced
+        <motion.div whileHover={{ y: -3 }} transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+          <Card className="border-slate-200 dark:border-navy-800 hover:border-slate-300 dark:hover:border-navy-700 transition-all h-full">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Immutability Protection</span>
+            <div className="flex items-center gap-2 mt-2">
+              <Lock className="w-5 h-5 text-blue-500" />
+              <span className="text-lg font-black text-slate-900 dark:text-white">
+                Database Enforced
+              </span>
+            </div>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              PostgreSQL BEFORE UPDATE/DELETE Triggers
             </span>
-          </div>
-          <span className="text-[11px] text-slate-400 mt-1 block">
-            PostgreSQL BEFORE UPDATE/DELETE Triggers
-          </span>
-        </Card>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Explorer Cards */}
@@ -130,6 +142,6 @@ export const AuditorDashboardPage: React.FC = () => {
           </Card>
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 };

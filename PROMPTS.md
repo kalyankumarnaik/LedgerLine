@@ -59,3 +59,29 @@ This log documents key development milestones, AI assistance, architectural assu
   2. Added PostgreSQL table constraint: `CONSTRAINT chk_account_balance_non_negative CHECK (balance >= 0.0000)`.
   3. Created PostgreSQL triggers `trg_prevent_ledger_update` and `trg_prevent_ledger_delete` that raise an exception if any SQL `UPDATE` or `DELETE` is executed against `ledger_entries` or `journal_entries`.
 - **Relevant Git milestone:** `milestone/db-triggers-and-immutability` (Pending manual commit)
+
+---
+
+### Entry 6: 2026-11-06 — Account-Level Access Control & BOLA Prevention (Authorisation)
+- **Task assigned to AI:** Secure the transfer, deposit, and withdrawal endpoints against unauthorized access.
+- **AI-generated implementation:** AI placed `@PreAuthorize("hasRole('ACCOUNT_HOLDER')")` on `TransactionController` transfer and withdrawal methods.
+- **Specific issue or incorrect assumption discovered:** Relying solely on role-based authorization creates a critical Broken Object Level Authorization (BOLA / IDOR) vulnerability. Any user with `ROLE_ACCOUNT_HOLDER` could pass another customer's `sourceAccountId` in the JSON request body and drain their funds, because the role check only confirms the caller is a customer, not that they *own* the specific source account.
+- **How the implementation was verified:** Tested with `SecurityAndAuthorizationTest.testWithdrawUnauthorizedAccountForbidden()`, where user "alex" attempted to withdraw from "elena"'s account UUID.
+- **What correction was made:** Implemented mandatory account-level permission verification in `FinancialEngineService.verifyAccountAccess()`. The engine checks whether the authenticated `principal.getId()` matches the account's registered `user_id` or possesses an explicit grant in the `account_permissions` table with `OWNER` or `TRANSFER` rights. If not, it halts processing, logs a security failure, and returns `HTTP 403 Forbidden` (`UnauthorizedAccountAccessException`).
+- **Relevant Git milestone:** `milestone/account-level-authorisation-bola-defense` (Pending manual commit)
+
+---
+
+### Entry 7: 2026-11-06 — Strict Auditor Separation of Duties & Tamper-Proof Audit Logging (Access Control & Audit Trail)
+- **Task assigned to AI:** Implement the Independent Auditor role and system adjustment capabilities for Administrators.
+- **AI-generated implementation:** AI initially granted Auditors access to standard financial endpoints with "read-only flags", and allowed Administrators to directly execute balance adjustments on accounts.
+- **Specific issue or incorrect assumption discovered:** In production fintech software and regulatory standards (SOC 2, ISO 27001):
+  1. An Auditor role must have strict structural separation of duties. If auditor credentials can reach financial mutation endpoints, an attacker compromising an auditor account could execute transfers.
+  2. Administrators must NEVER be able to silently alter an account balance. Direct balance edits destroy financial auditability.
+- **How the implementation was verified:** Evaluated Spring Security filter chains and reconciliation integrity tests.
+- **What correction was made:**
+  1. Gated all Auditor endpoints under `/api/v1/auditor/**` with strict `GET`-only semantics. Auditors have zero access to `/transfer`, `/deposit`, `/withdraw`, or administrative mutations.
+  2. Implemented dual-authorization workflow for administrative adjustments (`AccountAdjustmentRequest` and `AdjustmentApproval`).
+  3. Forced all adjustments to execute as formal double-entry `JournalEntry` and `LedgerEntry` compensating postings linked to the central clearing account, completely forbidding silent balance mutations.
+  4. Structured an append-only `AuditEvent` mechanism recording user identity, action type, IP address, correlation ID, and timestamp on all security-critical operations.
+- **Relevant Git milestone:** `milestone/auditor-separation-and-immutable-audit-trail` (Pending manual commit)

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { transactionService } from '../../services/transactionService';
 import { Transaction } from '../../types';
 import { Card } from '../../components/ui/Card';
@@ -68,7 +69,12 @@ export const TransactionHistoryPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-6"
+    >
       <div>
         <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Transaction History</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
@@ -180,6 +186,6 @@ export const TransactionHistoryPage: React.FC = () => {
         onClose={() => setSelectedTx(null)}
         transaction={selectedTx}
       />
-    </div>
+    </motion.div>
   );
 };

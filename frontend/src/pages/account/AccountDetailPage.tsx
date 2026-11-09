@@ -75,6 +75,7 @@ export const AccountDetailPage: React.FC = () => {
     a.href = url;
     a.download = `statement-${account?.accountNumber || id}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   if (loading) {

@@ -12,6 +12,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+.vercel/
 
 # IDE & OS
 .idea/
@@ -27,3 +28,5 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
+backend/logs/

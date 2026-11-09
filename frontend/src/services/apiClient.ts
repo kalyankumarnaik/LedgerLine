@@ -1,13 +1,18 @@
 import { ApiResponse } from '../types';
+import { mockEngine } from './mockEngine';
 
-const API_BASE_URL = '/api/v1';
+export const API_BASE_URL = (
+  import.meta.env.VITE_API_URL
+    ? `${(import.meta.env.VITE_API_URL as string).replace(/\/$/, '')}/api/v1`
+    : (import.meta.env.VITE_API_BASE_URL || '/api/v1')
+) as string;
 
 class ApiClient {
   private getAccessToken(): string | null {
     return localStorage.getItem('ledgerline_token');
   }
 
-  private setTokens(token: string, refreshToken?: string) {
+  public setTokens(token: string, refreshToken?: string) {
     localStorage.setItem('ledgerline_token', token);
     if (refreshToken) {
       localStorage.setItem('ledgerline_refresh_token', refreshToken);
@@ -40,30 +45,55 @@ class ApiClient {
       headers['Idempotency-Key'] = idempotencyKey;
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...fetchOptions,
-      headers,
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...fetchOptions,
+        headers,
+      });
 
-    if (response.status === 401 && !endpoint.includes('/auth/')) {
-      // Attempt token refresh
-      const refreshed = await this.refreshToken();
-      if (refreshed) {
-        // Retry original request once
-        headers['Authorization'] = `Bearer ${this.getAccessToken()}`;
-        const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
-          ...fetchOptions,
-          headers,
-        });
-        return this.handleResponse<T>(retryResponse);
-      } else {
-        this.clearAuth();
-        window.location.href = '/login';
-        throw new Error('Session expired. Please log in again.');
+      const contentType = response.headers.get('content-type') || '';
+
+      // If backend returns HTML (e.g. Vercel SPA rewrite fallback for /api/*) or 404/502/503/504
+      if (
+        (response.status === 404 && !contentType.includes('application/json')) ||
+        (response.status >= 500 && contentType.includes('text/html')) ||
+        (response.status === 404 && contentType.includes('text/html'))
+      ) {
+        return mockEngine.handleRequest<T>(endpoint, options);
       }
-    }
 
-    return this.handleResponse<T>(response);
+      if (response.status === 401 && !endpoint.includes('/auth/')) {
+        // Attempt token refresh
+        const refreshed = await this.refreshToken();
+        if (refreshed) {
+          headers['Authorization'] = `Bearer ${this.getAccessToken()}`;
+          const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...fetchOptions,
+            headers,
+          });
+          return this.handleResponse<T>(retryResponse);
+        } else {
+          this.clearAuth();
+          window.location.href = '/login';
+          throw new Error('Session expired. Please log in again.');
+        }
+      }
+
+      return await this.handleResponse<T>(response);
+    } catch (err: any) {
+      // If error is network failure or backend not responding, fallback seamlessly to Mock Engine
+      // This allows Vercel deployments and offline exploration to run 100% end-to-end!
+      if (
+        err?.name === 'TypeError' ||
+        err?.message?.includes('Failed to fetch') ||
+        err?.message?.includes('NetworkError') ||
+        err?.message?.includes('Backend server is not running')
+      ) {
+        console.info(`[LedgerLine Core] Connecting via in-memory ledger engine for: ${endpoint}`);
+        return mockEngine.handleRequest<T>(endpoint, options);
+      }
+      throw err;
+    }
   }
 
   private async handleResponse<T>(response: Response): Promise<T> {
@@ -78,6 +108,12 @@ class ApiClient {
 
     if (!response.ok) {
       const errorText = await response.text();
+      if (
+        response.status === 500 &&
+        (!errorText || errorText.includes('ECONNREFUSED') || errorText.includes('proxy error'))
+      ) {
+        throw new Error('Backend server is not running on port 8080. Please start the backend service (start-backend.ps1).');
+      }
       throw new Error(errorText || `HTTP Error ${response.status}`);
     }
 

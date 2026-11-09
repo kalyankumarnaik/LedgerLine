@@ -60,25 +60,74 @@ For local testing and demonstration purposes, the database seed migration (`V3__
 
 ---
 
-## 4. Quick Start: Running with Docker Compose
+## 4. How to Run LedgerLine
 
-To start the complete environment (PostgreSQL database, Spring Boot backend, and React/Nginx frontend) in one command:
+You can run LedgerLine either natively using your local tools (Node.js, Java, PostgreSQL) or containerized with Docker.
 
-```bash
-# Clone the repository
-git clone https://github.com/organization/LedgerLine.git
-cd LedgerLine
+### Option A: Direct Local Execution (Recommended)
 
-# Start services
-docker-compose up --build -d
+#### Step 1: Ensure PostgreSQL 18 is Running and Database is Created
+PostgreSQL 18 is installed locally. Open PowerShell and run:
+```powershell
+# 1. Start PostgreSQL Windows service (if not already running)
+Start-Service postgresql-x64-18
 
-# Verify container health
-docker-compose ps
+# 2. Create the 'ledgerline' database
+& "C:\Program Files\PostgreSQL\18\bin\createdb.exe" -U postgres ledgerline
 ```
+*(Alternatively, create database `ledgerline` in **pgAdmin 4**).*
 
+#### Step 2: Start the Backend (Spring Boot 3.3.5)
+Open PowerShell and run:
+```powershell
+cd d:\Projects\LedgerLine
+.\start-backend.ps1
+```
+*Or manually:*
+```powershell
+cd d:\Projects\LedgerLine\backend
+$env:JAVA_HOME = "C:\Program Files\Java\jdk-25.0.2"
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+.\mvnw.cmd spring-boot:run
+```
+Flyway will automatically apply database migrations (`V1__init_schema.sql`, `V2__triggers_and_immutability.sql`, `V3__seed_data.sql`) and seed default demo accounts on port **8080**.
+
+#### Step 3: Start the Frontend (Vite + React 18)
+In a **second PowerShell window**:
+```powershell
+cd d:\Projects\LedgerLine
+.\start-frontend.ps1
+```
+*Or manually:*
+```powershell
+cd d:\Projects\LedgerLine\frontend
+npm install
+npm run dev
+```
+Open **[http://localhost:5173](http://localhost:5173)** in your browser!
+
+---
+
+### Option B: Running with Docker Compose (If Docker Desktop is Installed)
+
+If Docker Desktop is installed and running on your machine:
+```powershell
+docker compose up --build -d
+docker compose ps
+```
 - **Frontend Application:** [http://localhost](http://localhost) (or `http://localhost:5173` in dev mode)
 - **Backend API & Actuator:** [http://localhost:8080](http://localhost:8080)
 - **Swagger UI API Explorer:** [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+---
+
+### Option C: Deploying to Vercel (Instant Cloud Preview & Production)
+
+LedgerLine is pre-configured for one-click deployment on **Vercel**:
+1. Connect this repository to **Vercel**.
+2. Deploy either from repository root (`./`) or with Root Directory set to `frontend`.
+3. SPA rewrite rules, chunk optimization, and persistent double-entry simulation are configured automatically.
+4. If you have a hosted Spring Boot backend, set `VITE_API_URL` (e.g. `https://api.yourdomain.com`) in Vercel Environment Variables. If not set, LedgerLine runs fully functional end-to-end in standalone cloud mode with browser persistence!
 
 ---
 

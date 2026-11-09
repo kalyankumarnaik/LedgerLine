@@ -1,0 +1,20 @@
+#!/bin/sh
+# Maven Wrapper for Unix/Linux/macOS
+WRAPPER_DIR="$HOME/.m2/wrapper/dists/apache-maven-3.9.9"
+MAVEN_CMD="$WRAPPER_DIR/apache-maven-3.9.9/bin/mvn"
+
+if command -v mvn >/dev/null 2>&1; then
+    exec mvn "$@"
+fi
+
+if [ -f "$MAVEN_CMD" ]; then
+    exec "$MAVEN_CMD" "$@"
+fi
+
+echo "[LedgerLine] System Maven not found. Downloading Apache Maven 3.9.9..."
+mkdir -p "$WRAPPER_DIR"
+curl -sSL "https://archive.apache.org/dist/maven/maven-3/3.9.9/binaries/apache-maven-3.9.9-bin.zip" -o "$WRAPPER_DIR/maven.zip"
+unzip -q -o "$WRAPPER_DIR/maven.zip" -d "$WRAPPER_DIR"
+rm -f "$WRAPPER_DIR/maven.zip"
+chmod +x "$MAVEN_CMD"
+exec "$MAVEN_CMD" "$@"

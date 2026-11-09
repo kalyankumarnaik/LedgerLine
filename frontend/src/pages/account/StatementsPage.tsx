@@ -58,6 +58,7 @@ export const StatementsPage: React.FC = () => {
     a.href = url;
     a.download = `statement-${statement?.accountNumber || 'account'}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (

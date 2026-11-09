@@ -19,6 +19,7 @@ import {
   Sparkles,
   SlidersHorizontal,
   FileStack,
+  Bell,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,10 +31,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { isAdmin, isAuditor, isAccountHolder } = useAuth();
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+    `flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
       isActive
-        ? 'bg-violet-brand text-white shadow-md shadow-violet-500/20 font-semibold'
-        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-navy-800 hover:text-slate-900 dark:hover:text-white'
+        ? 'bg-gradient-to-r from-violet-600 to-violet-700 text-white shadow-md shadow-violet-500/25 font-semibold translate-x-0.5'
+        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-navy-800 hover:text-slate-900 dark:hover:text-white hover:translate-x-0.5'
     }`;
 
   return (
@@ -104,6 +105,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <FileText className="w-4 h-4" />
                   <span>Statements & CSV</span>
                 </NavLink>
+                <NavLink to="/notifications" className={linkClass} onClick={onClose}>
+                  <Bell className="w-4 h-4" />
+                  <span>Notification Center</span>
+                </NavLink>
               </nav>
             </div>
           )}
@@ -173,6 +178,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 <NavLink to="/auditor/integrity" className={linkClass} onClick={onClose}>
                   <Scale className="w-4 h-4" />
                   <span>Integrity Verification</span>
+                </NavLink>
+                <NavLink to="/auditor/reconciliation" className={linkClass} onClick={onClose}>
+                  <Scale className="w-4 h-4" />
+                  <span>Reconciliation Center</span>
                 </NavLink>
                 <NavLink to="/auditor/failed-attempts" className={linkClass} onClick={onClose}>
                   <ShieldAlert className="w-4 h-4" />
