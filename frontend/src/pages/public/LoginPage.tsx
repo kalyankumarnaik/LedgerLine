@@ -64,7 +64,7 @@ export const LoginPage: React.FC = () => {
             <Scale className="w-6 h-6 text-white" />
           </div>
           <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            Ledger<span className="text-violet-brand">Line</span>
+            Balance<span className="text-violet-brand">Vault</span>
           </span>
         </Link>
         <h2 className="mt-4 text-2xl font-black text-slate-900 dark:text-white tracking-tight">Sign in to your account</h2>

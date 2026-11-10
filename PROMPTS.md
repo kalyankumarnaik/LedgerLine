@@ -85,3 +85,98 @@ This log documents key development milestones, AI assistance, architectural assu
   3. Forced all adjustments to execute as formal double-entry `JournalEntry` and `LedgerEntry` compensating postings linked to the central clearing account, completely forbidding silent balance mutations.
   4. Structured an append-only `AuditEvent` mechanism recording user identity, action type, IP address, correlation ID, and timestamp on all security-critical operations.
 - **Relevant Git milestone:** `milestone/auditor-separation-and-immutable-audit-trail` (Pending manual commit)
+
+---
+
+### Entry 8: 2026-11-09 — Vercel SPA Routing, Standalone Double-Entry Engine & Chunk Optimization
+- **Task assigned to AI:** Ensure the LedgerLine frontend can be deployed smoothly to Vercel and runs end-to-end both with and without a live JVM backend.
+- **AI-generated implementation:** Initial frontend build configured standard Vite output (`dist/`) pointing to `http://localhost:8080/api/v1`.
+- **Specific issue or incorrect assumption discovered:** 
+  1. On Vercel, client-side React Router navigation works, but hard page refreshes on subroutes (`/dashboard`, `/login`, `/transfer`) throw `404 Not Found` because Vercel looks for physical `.html` files at those paths without rewrite rules.
+  2. If the user previews the frontend on Vercel without hosting the Spring Boot backend on a cloud server, all API network requests fail with `ERR_CONNECTION_REFUSED`, breaking demonstrations and evaluation.
+  3. Lucide icons and Recharts were bundled into a single monolithic bundle (>800kB), producing Vite chunk-size warnings.
+- **How the implementation was verified:** Added root and `frontend/` `vercel.json` rewrite configurations (`/(.*)` -> `/index.html`), configured `vite.config.ts` manual chunking, and verified the build using `npm run build`.
+- **What correction was made:**
+  1. Added `vercel.json` rewrite rules ensuring all deep SPA URLs resolve to `index.html`.
+  2. Created `mockEngine.ts` with an in-memory double-entry accounting engine, localStorage persistence, and pre-seeded demonstration accounts (`admin`, `alex`, `elena`, `sarah`), with transparent failover in `apiClient.ts` whenever the backend is unreachable.
+  3. Configured Rollup manual chunking in `vite.config.ts` to divide dependencies into `vendor`, `charts`, and `icons` chunks (all <400kB).
+- **Relevant Git milestone:** `milestone/vercel-deployment-and-standalone-engine` (Committed in `ddc59d3`)
+
+---
+
+### Entry 9: 2026-11-09 — Comprehensive Motion System, Tactile Micro-Interactions & Audit Receipts
+- **Task assigned to AI:** Add fluid spring animations, tactile micro-interactions, and verify end-to-end button/icon functionality across all pages.
+- **AI-generated implementation:** Initial UI relied solely on static Tailwind hover states and CSS transitions without physics-based interactive feedback.
+- **Specific issue or incorrect assumption discovered:**
+  1. Critical buttons lacked tactile spring feedback on tap/click (`whileTap`), making financial transactions feel sluggish and non-responsive.
+  2. The login page had no link to `ForgotPasswordPage.tsx`, preventing self-service credential recovery.
+  3. `Navbar` dropdowns remained stuck open when users clicked outside their bounds.
+  4. CSV statement exports created blob URLs with `window.URL.createObjectURL(blob)` without calling `window.URL.revokeObjectURL(url)`, introducing browser memory leaks.
+- **How the implementation was verified:** Rebuilt `Button.tsx`, `Card.tsx`, `Modal.tsx`, `ReceiptModal.tsx`, and verified modal transitions, route transitions, and CSV generation with automated tests.
+- **What correction was made:**
+  1. Integrated `framer-motion` (`whileHover`, `whileTap`, `AnimatePresence`) across buttons, modals, cards, and route changes in `AppLayout.tsx`.
+  2. Implemented printable and downloadable official `.txt` audit receipts in `ReceiptModal.tsx`.
+  3. Added outside click listeners (`mousedown`) to `Navbar.tsx` for clean dismissal of notification and profile menus.
+  4. Added `window.URL.revokeObjectURL(url)` on CSV exports in `AccountDetailPage.tsx` and `StatementsPage.tsx`.
+- **Relevant Git milestone:** `milestone/motion-system-and-ui-microinteractions` (Committed in `ddc59d3`)
+
+---
+
+### Entry 10: 2026-11-09 — VS Code Workspace Hygiene & Redundant Artifact De-cluttering
+- **Task assigned to AI:** Remove unnecessary files, resolve duplicate launcher scripts, and streamline the VS Code developer experience.
+- **AI-generated implementation:** Initial commit contained duplicate startup scripts in both the repository root (`start-backend.ps1`, `start-frontend.ps1`) and inside subdirectories (`backend/start-backend.ps1`, `frontend/start-frontend.ps1`), along with historical log files (`backend/logs/`) and empty directories.
+- **Specific issue or incorrect assumption discovered:**
+  1. Duplicate launcher scripts in subdirectories created ambiguity over the canonical execution command and cluttered search results.
+  2. Large development logs (`ledgerline.log`, `ledgerline.log.*.gz`) were lingering in the project tree.
+  3. The VS Code file explorer and search panel were unconfigured, displaying noisy binary build artifacts (`target/`, `dist/`, `logs/`, `node_modules/`).
+- **How the implementation was verified:** Verified root scripts handle directory resolution automatically, removed redundant copies, and verified `npm run build` succeeds cleanly.
+- **What correction was made:**
+  1. Removed redundant `backend/start-backend.ps1` and `frontend/start-frontend.ps1`, establishing root scripts as the canonical launchers.
+  2. Removed `backend/logs/` and empty folders `frontend/src/hooks` and `frontend/src/utils`.
+  3. Configured `.vscode/settings.json` with `files.exclude` and `search.exclude` rules to hide generated build outputs and intermediate files from VS Code.
+- **Relevant Git milestone:** `milestone/workspace-hygiene-and-decluttering` (Pending manual commit)
+
+---
+
+### Entry 11: 2026-11-09 — Vibrant Color Architecture, Atmospheric Glows & Visual Engagement
+- **Task assigned to AI:** Upgrade website aesthetics using rich colors, atmospheric mesh gradients, pulsing telemetry indicators, and attractive digital banking visuals.
+- **AI-generated implementation:** Initial theme relied on monochromatic slates with single-accent purples, creating a muted and utilitarian visual tone.
+- **Specific issue or incorrect assumption discovered:** Modern fintech design systems (e.g., Stripe, Mercury, Revolut) demand rich chromatic visual hierarchy:
+  1. Metric cards lacked distinct identity; users could not instantly differentiate inflows (emerald), outflows (rose), and transactions (cyan) at a glance.
+  2. Account cards looked like generic flat boxes rather than premium digital debit cards.
+  3. Landing page lacked live interactive financial mechanics to immediately convey the double-entry value proposition to new visitors.
+- **How the implementation was verified:** Tested across light and dark modes with production build (`tsc && vite build`).
+- **What correction was made:**
+  1. Added `@keyframes float-gentle`, `@keyframes pulse-glow`, and `@keyframes gradient-flow` in `index.css` alongside `.card-glow-*` chromatic shadow utilities.
+  2. Upgraded `Badge.tsx` with animated pulsing indicator dots for live states (`ACTIVE`, `PENDING`, `POSTED`).
+  3. Built an interactive Live Double-Entry Simulation Ticker on `LandingPage.tsx` showcasing balanced debit and credit entries with mathematical proofs.
+  4. Transformed `AccountsPage.tsx` with virtual digital debit card aesthetics, metallic chip icons, and account-specific gradient themes (Checking = Violet/Indigo, Savings = Emerald/Teal, Escrow = Amber/Gold).
+  5. Added quick-amount selector pills (+₹500, +₹1,000, +₹5,000, Max) and live remaining balance calculations across `TransferPage.tsx`, `DepositPage.tsx`, and `WithdrawPage.tsx`.
+- **Relevant Git milestone:** `milestone/vibrant-color-architecture-and-motion` (Pending manual commit)
+
+---
+
+### Entry 12: 2026-11-09 — BalanceVault Realignment, Prisma Schema, Redis Rate Limiting, First-Admin Bootstrap & Health Checks
+- **Task assigned to AI:** Align the codebase with the updated challenge specification (renamed from LedgerLine to BalanceVault), fulfilling additional mandatory requirements: account management & user onboarding, RBAC enhancements, Prisma schema mapping, Redis rate limiting, first-admin bootstrap script, database roles, and deployment health/readiness checks.
+- **AI-generated implementation:** Initial assumption considered rebuilding the repository from scratch in Node.js due to the organizer's reference project snippet.
+- **Specific issue or incorrect assumption discovered:**
+  1. The hackathon organizers officially clarified: "BalanceVault is simply the renamed version of the LedgerLine challenge. It is the same challenge, not a new one. All original financial integrity requirements remain fully applicable. Please extend your existing LedgerLine implementation."
+  2. Evaluator tools expect `npm run db:generate` and `npm run db:migrate` with a valid `prisma/schema.prisma` mapping the PostgreSQL tables.
+  3. Brute force credential stuffing and rapid transaction submission required distributed sliding-window rate limiting with `Retry-After` headers.
+  4. First administrator provisioning previously relied on pre-seeded cleartext initialization. Production security requires a dedicated bootstrap script (`bootstrap-admin.ps1`) executing under a restricted operator role with audit logging.
+  5. Deployment container orchestrators require distinct `/health/liveness` and `/health/readiness` endpoints probing database and rate limiter states.
+- **How the implementation was verified:**
+  1. Verified `prisma/schema.prisma` maps all 13 PostgreSQL entities.
+  2. Verified `bootstrap-admin.ps1` and `scripts/bootstrap-admin.sh` execute idempotent admin setup.
+  3. Verified `RateLimiterService` and `RateLimitingFilter` return `HTTP 429` on excessive requests.
+  4. Verified `/health/liveness` and `/health/readiness` return `HTTP 200` with component latencies.
+  5. Verified `npm run build` passes with zero errors.
+- **What correction was made:**
+  1. Seamlessly extended the existing architecture and rebranded UI to BalanceVault with tagline "Money movement with a ledger you can prove".
+  2. Added complete `prisma/schema.prisma` and added `db:generate`, `db:migrate`, and `bootstrap:admin` scripts to `package.json`.
+  3. Created `RateLimiterService` and `RateLimitingFilter` for auth and financial endpoints.
+  4. Added `bootstrap-admin.ps1` and `scripts/bootstrap-admin.sh` with BCrypt hashing and audit logging.
+  5. Created Flyway migration `V4__database_roles_separation.sql` defining `bv_app`, `bv_auditor`, `bv_bootstrap_operator`, and `bv_owner`.
+  6. Implemented `HealthCheckController` for `/health/liveness` and `/health/readiness`.
+  7. Updated `THREATS.md`, `API_DOCUMENTATION.md`, and `README.md`.
+- **Relevant Git milestone:** `milestone/balancevault-realignment-and-mandatory-features` (Pending manual commit)

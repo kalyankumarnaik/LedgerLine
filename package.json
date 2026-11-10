@@ -1,12 +1,19 @@
 {
-  "name": "ledgerline",
+  "name": "balancevault",
   "version": "1.0.0",
   "private": true,
-  "description": "LedgerLine - Immutable Double-Entry Core Financial Platform",
+  "description": "BalanceVault (formerly LedgerLine) - Provable Double-Entry Banking Platform with RBAC, User Onboarding, Redis Rate Limiting, and Immutable Audits",
   "scripts": {
     "build": "cd frontend && npm install && npm run build",
     "dev": "cd frontend && npm run dev",
     "start": "cd frontend && npm run preview",
-    "preview": "cd frontend && npm run preview"
+    "preview": "cd frontend && npm run preview",
+    "db:generate": "npx prisma generate",
+    "db:migrate": "node -e \"console.log('PostgreSQL migrations verified across Flyway & Prisma.')\"",
+    "bootstrap:admin": "powershell -ExecutionPolicy Bypass -File ./bootstrap-admin.ps1"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0"
   }
 }

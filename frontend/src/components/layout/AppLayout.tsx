@@ -10,9 +10,10 @@ export const AppLayout: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-slate-50/70 dark:bg-navy-950 text-slate-900 dark:text-slate-100 flex transition-colors overflow-x-hidden">
-      {/* Ambient glowing radial orbs */}
-      <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-violet-600/5 dark:bg-violet-600/10 rounded-full blur-[120px] pointer-events-none -z-10 transform translate-x-1/3 -translate-y-1/3" />
-      <div className="fixed bottom-0 left-64 w-[450px] h-[450px] bg-emerald-500/5 dark:bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none -z-10 transform -translate-x-1/3 translate-y-1/3" />
+      {/* Ambient glowing multi-chromatic radial orbs */}
+      <div className="fixed top-0 right-0 w-[550px] h-[550px] bg-violet-600/10 dark:bg-violet-600/15 rounded-full blur-[130px] pointer-events-none -z-10 transform translate-x-1/4 -translate-y-1/4 animate-pulse-glow" />
+      <div className="fixed bottom-0 left-64 w-[450px] h-[450px] bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-[140px] pointer-events-none -z-10 transform -translate-x-1/4 translate-y-1/4" />
+      <div className="fixed top-1/2 right-1/4 w-[350px] h-[350px] bg-cyan-500/5 dark:bg-cyan-500/10 rounded-full blur-[110px] pointer-events-none -z-10" />
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

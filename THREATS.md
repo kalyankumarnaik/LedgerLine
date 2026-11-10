@@ -1,6 +1,6 @@
-# LedgerLine Threat Modeling & Security Analysis (THREATS.md)
+# BalanceVault (formerly LedgerLine) Threat Modeling & Security Analysis (THREATS.md)
 
-This document provides a comprehensive security threat analysis for the LedgerLine fintech platform, detailing threat scenarios, prevention mechanisms, database and backend enforcements, and residual risk evaluations.
+This document provides a comprehensive security threat analysis for the BalanceVault fintech platform, detailing threat scenarios, prevention mechanisms, database and backend enforcements, and residual risk evaluations.
 
 ---
 
@@ -230,3 +230,36 @@ This document provides a comprehensive security threat analysis for the LedgerLi
 - **Backend Enforcement:** State is persisted to database only at transaction commit.
 - **Database Enforcement:** PostgreSQL WAL (Write-Ahead Logging) and automatic recovery roll back uncommitted locks.
 - **Residual Risk:** Client receives HTTP connection drop; client retries safely using the same `Idempotency-Key`.
+
+---
+
+## 21. Distributed Denial of Service & Brute-Force Flooding
+- **Threat Description:** Malicious bots flood financial write endpoints (`/transfer`, `/deposit`, `/withdraw`) or brute-force user authentication (`/auth/login`).
+- **Attack Scenario:** Attacker executes 10,000 rapid password guesses or spams transfer requests to exhaust database locks and thread pools.
+- **Potential Impact:** Service degradation, legitimate customer lockout, thread pool starvation.
+- **Prevention Mechanism:** Multi-tier sliding window rate limiting backed by Redis and token-bucket filters.
+- **Backend Enforcement:** `RateLimitingFilter` enforces 15 req/min on `/auth/` and 40 req/min on financial transfers, returning `HTTP 429 Too Many Requests` with `Retry-After`.
+- **Database Enforcement:** PostgreSQL connection pooling (`HikariCP`) isolates connection spikes.
+- **Residual Risk:** Distributed botnets spoofing client IPs. Mitigated via reverse-proxy header parsing (`X-Forwarded-For`, `X-Real-IP`) and Cloudflare/WAF integration.
+
+---
+
+## 22. Database Privilege Escalation & Role Separation
+- **Threat Description:** A compromised application service account or SQL injection attempts to alter schema definitions or drop database triggers.
+- **Attack Scenario:** Attacker attempts `DROP TRIGGER trg_prevent_ledger_update ON ledger_entries`.
+- **Potential Impact:** Permanent destruction of financial audit guarantees.
+- **Prevention Mechanism:** Principle of Least Privilege PostgreSQL database role separation (`bv_app`, `bv_auditor`, `bv_bootstrap_operator`, `bv_owner`).
+- **Backend Enforcement:** The operational application connects via `bv_app`, which possesses DML permissions (`SELECT`, `INSERT`, `UPDATE`) only and zero DDL permissions.
+- **Database Enforcement:** `REVOKE ALL PRIVILEGES` on DDL schema operations; `bv_auditor` has read-only `SELECT` access with zero write permissions.
+- **Residual Risk:** Managed database provider credentials must maintain strong password rotation and TLS encryption in transit.
+
+---
+
+## 23. First-Administrator Bootstrap Hijacking
+- **Threat Description:** An unauthorized party invokes bootstrap initialization on a freshly deployed instance to grant themselves superuser privileges.
+- **Attack Scenario:** Attacker calls `/bootstrap-admin` or runs bootstrap scripts after the service goes live.
+- **Potential Impact:** Complete administrative platform takeover.
+- **Prevention Mechanism:** Idempotent one-time bootstrap enforcement in database stored function `bootstrap_admin_user()`.
+- **Backend Enforcement:** Script checks if any user with `ROLE_ADMIN` exists; if count > 0, the operation is immediately rejected and logged as a security alert.
+- **Database Enforcement:** Security definer stored function enforces single-admin bootstrap and writes an immutable `AuditEvent`.
+- **Residual Risk:** None once initialized. Initial bootstrap should be executed before exposing endpoints to the public internet.

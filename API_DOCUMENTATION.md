@@ -1,6 +1,59 @@
-# LedgerLine API Reference Documentation (API_DOCUMENTATION.md)
+# BalanceVault (formerly LedgerLine) API Reference Documentation (API_DOCUMENTATION.md)
 
-All REST API endpoints are versioned under `/api/v1` and accept/return JSON payloads.
+All REST API endpoints are versioned under `/api/v1` and accept/return JSON payloads. Health and readiness endpoints are available at root `/health/*` for container orchestrators.
+
+---
+
+## 0. RBAC Authorization & Security Model
+
+BalanceVault enforces Role-Based Access Control (RBAC) across three distinct cryptographic roles:
+
+| Role | Scope | Key Endpoints | Mutation Allowed |
+| :--- | :--- | :--- | :---: |
+| **ROLE_ACCOUNT_HOLDER** | Personal Banking | `/api/v1/accounts/**`, `/api/v1/transactions/**` | Transfers, Deposits, Withdrawals |
+| **ROLE_ADMIN** | Platform Operations | `/api/v1/admin/**` (Approvals, Users, Risk) | Dual-Control Adjustments, Status |
+| **ROLE_AUDITOR** | Regulatory Oversight | `/api/v1/auditor/**` (Ledger, Invariants) | **READ-ONLY (Strictly Zero Writes)** |
+
+All endpoints enforce **Rate Limiting** via Redis / token-bucket filters:
+- **Auth endpoints (`/auth/*`)**: 15 requests/minute
+- **Financial operations (`/transactions/*`)**: 40 requests/minute
+- **Rate Limit Headers**: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `Retry-After` (on `HTTP 429`)
+
+---
+
+## 0.1 Deployment Health & Readiness Endpoints
+
+### 0.1.1 Liveness Probe
+- **Method:** `GET`
+- **Path:** `/health/liveness`
+- **Access:** Public
+- **Response (`HTTP 200`):**
+  ```json
+  {
+    "status": "UP",
+    "service": "BalanceVault Core Platform",
+    "timestamp": "2026-11-09T19:40:00Z",
+    "uptimeSeconds": 1420
+  }
+  ```
+
+### 0.1.2 Readiness Probe
+- **Method:** `GET`
+- **Path:** `/health/readiness`
+- **Access:** Public
+- **Response (`HTTP 200`):**
+  ```json
+  {
+    "status": "UP",
+    "service": "BalanceVault Core Platform",
+    "components": {
+      "database": { "status": "UP", "engine": "PostgreSQL", "latencyMs": 2 },
+      "rateLimiter": { "status": "UP", "policy": "Sliding Window Token Bucket" },
+      "ledgerEngine": { "status": "UP", "model": "Strict Double-Entry Balanced Journal" }
+    },
+    "timestamp": "2026-11-09T19:40:00Z"
+  }
+  ```
 
 ---
 

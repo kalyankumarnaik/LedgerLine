@@ -24,7 +24,7 @@ export const ReceiptModal: React.FC<ReceiptModalProps> = ({
 
   const handleDownload = () => {
     const receiptContent = `================================================
-           LEDGERLINE PROVABLE RECEIPT
+          BALANCEVAULT PROVABLE RECEIPT
 ================================================
 Reference:       ${transaction.transactionReference}
 Timestamp:       ${new Date(transaction.createdAt).toLocaleString()}
@@ -36,7 +36,7 @@ From Account:    ${transaction.sourceAccountNumber || 'EXTERNAL CLEARING'}
 To Account:      ${transaction.destinationAccountNumber || 'EXTERNAL CLEARING'}
 Initiated By:    ${transaction.initiatedByUsername}
 Description:     ${transaction.description || 'N/A'}
-Core Invariant:  Double-entry balanced. Immutable journal record posted to LedgerLine core.
+Core Invariant:  Double-entry balanced. Immutable journal record posted to BalanceVault core.
 ================================================`;
     const blob = new Blob([receiptContent], { type: 'text/plain;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
@@ -57,7 +57,7 @@ Core Invariant:  Double-entry balanced. Immutable journal record posted to Ledge
           </div>
           <div className="flex items-center justify-center gap-1.5 text-xs font-semibold tracking-wider uppercase text-violet-brand">
             <ShieldCheck className="w-4 h-4" />
-            <span>LedgerLine Provable Receipt</span>
+            <span>BalanceVault Provable Receipt</span>
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
             ₹{transaction.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
@@ -106,7 +106,7 @@ Core Invariant:  Double-entry balanced. Immutable journal record posted to Ledge
         {/* Invariant seal */}
         <div className="p-3 bg-slate-50 dark:bg-navy-950 rounded-xl text-xs text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-navy-800 flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-500 flex-shrink-0" />
-          <span>Double-entry balanced. Immutable journal record posted to LedgerLine core.</span>
+          <span>Double-entry balanced. Immutable journal record posted to BalanceVault core.</span>
         </div>
 
         {/* Action Buttons */}

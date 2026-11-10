@@ -1,0 +1,231 @@
+// ==============================================================================
+// BalanceVault - Prisma Database Schema
+// PostgreSQL Double-Entry Banking Ledger & Account Management Platform
+// ==============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String                 @id @default(uuid()) @db.Uuid
+  username             String                 @unique @db.VarChar(64)
+  email                String                 @unique @db.VarChar(255)
+  passwordHash         String                 @map("password_hash") @db.VarChar(255)
+  fullName             String                 @map("full_name") @db.VarChar(128)
+  enabled              Boolean                @default(true)
+  onboardingStatus     String                 @default("ONBOARDED") @map("onboarding_status") @db.VarChar(32)
+  failedLoginAttempts  Int                    @default(0) @map("failed_login_attempts")
+  lockedUntil          DateTime?              @map("locked_until") @db.Timestamptz
+  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime               @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  roles                UserRole[]
+  accounts             Account[]              @relation("AccountOwner")
+  accountPermissions   AccountPermission[]
+  initiatedTxns        FinancialTransaction[] @relation("TxnInitiator")
+  requestedAdjustments AccountAdjustmentRequest[] @relation("AdjustmentRequester")
+  reviewedAdjustments  AccountAdjustmentRequest[] @relation("AdjustmentReviewer")
+
+  @@map("users")
+}
+
+model Role {
+  id    String     @id @default(uuid()) @db.Uuid
+  name  String     @unique @db.VarChar(32)
+  users UserRole[]
+
+  @@map("roles")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId String @map("role_id") @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model Account {
+  id            String   @id @default(uuid()) @db.Uuid
+  accountNumber String   @unique @map("account_number") @db.VarChar(34)
+  userId        String   @map("user_id") @db.Uuid
+  name          String   @db.VarChar(128)
+  accountType   String   @map("account_type") @db.VarChar(32) // CHECKING, SAVINGS, ESCROW, SYSTEM_CLEARING
+  status        String   @default("ACTIVE") @db.VarChar(32) // ACTIVE, FROZEN, CLOSED
+  currency      String   @default("INR") @db.VarChar(3)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  owner               User                 @relation("AccountOwner", fields: [userId], references: [id])
+  balanceRecord       AccountBalance?
+  limitRecord         TransactionLimit?
+  permissions         AccountPermission[]
+  outgoingTransactions FinancialTransaction[] @relation("SourceAccount")
+  incomingTransactions FinancialTransaction[] @relation("DestinationAccount")
+  ledgerEntries       LedgerEntry[]
+  adjustmentRequests  AccountAdjustmentRequest[]
+
+  @@map("accounts")
+}
+
+model AccountBalance {
+  accountId   String   @id @map("account_id") @db.Uuid
+  balance     Decimal  @default(0.0000) @db.Decimal(19, 4)
+  version     BigInt   @default(0)
+  lastUpdated DateTime @default(now()) @updatedAt @map("last_updated") @db.Timestamptz
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@map("account_balances")
+}
+
+model AccountPermission {
+  id             String   @id @default(uuid()) @db.Uuid
+  accountId      String   @map("account_id") @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  permissionType String   @map("permission_type") @db.VarChar(32) // OWNER, TRANSFER, READ_ONLY
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, userId, permissionType], map: "uk_account_user_perm")
+  @@map("account_permissions")
+}
+
+model TransactionLimit {
+  id                  String   @id @default(uuid()) @db.Uuid
+  accountId           String   @unique @map("account_id") @db.Uuid
+  dailyLimit          Decimal  @default(100000.0000) @map("daily_limit") @db.Decimal(19, 4)
+  perTransactionLimit Decimal  @default(50000.0000) @map("per_transaction_limit") @db.Decimal(19, 4)
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("transaction_limits")
+}
+
+model FinancialTransaction {
+  id                    String    @id @default(uuid()) @db.Uuid
+  transactionReference  String    @unique @map("transaction_reference") @db.VarChar(64)
+  transactionType       String    @map("transaction_type") @db.VarChar(32) // TRANSFER, DEPOSIT, WITHDRAWAL, ADJUSTMENT
+  sourceAccountId       String?   @map("source_account_id") @db.Uuid
+  destinationAccountId  String?   @map("destination_account_id") @db.Uuid
+  amount                Decimal   @db.Decimal(19, 4)
+  currency              String    @default("INR") @db.VarChar(3)
+  status                String    @db.VarChar(32) // PENDING, POSTED, REJECTED, FAILED
+  description           String?   @db.VarChar(255)
+  initiatedBy           String    @map("initiated_by") @db.Uuid
+  failureReason         String?   @map("failure_reason") @db.VarChar(255)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  completedAt           DateTime? @map("completed_at") @db.Timestamptz
+
+  sourceAccount      Account?      @relation("SourceAccount", fields: [sourceAccountId], references: [id])
+  destinationAccount Account?      @relation("DestinationAccount", fields: [destinationAccountId], references: [id])
+  initiator          User          @relation("TxnInitiator", fields: [initiatedBy], references: [id])
+  journalEntry       JournalEntry?
+
+  @@map("financial_transactions")
+}
+
+model JournalEntry {
+  id             String   @id @default(uuid()) @db.Uuid
+  transactionId  String   @unique @map("transaction_id") @db.Uuid
+  entryReference String   @unique @map("entry_reference") @db.VarChar(64)
+  description    String?  @db.VarChar(255)
+  postedAt       DateTime @default(now()) @map("posted_at") @db.Timestamptz
+
+  transaction   FinancialTransaction @relation(fields: [transactionId], references: [id])
+  ledgerEntries LedgerEntry[]
+
+  @@map("journal_entries")
+}
+
+model LedgerEntry {
+  id             String   @id @default(uuid()) @db.Uuid
+  journalEntryId String   @map("journal_entry_id") @db.Uuid
+  accountId      String   @map("account_id") @db.Uuid
+  entryType      String   @map("entry_type") @db.VarChar(8) // DEBIT or CREDIT
+  amount         Decimal  @db.Decimal(19, 4)
+  runningBalance Decimal  @map("running_balance") @db.Decimal(19, 4)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id])
+  account      Account      @relation(fields: [accountId], references: [id])
+
+  @@map("ledger_entries")
+}
+
+model IdempotencyRecord {
+  id             String    @id @default(uuid()) @db.Uuid
+  idempotencyKey String    @unique @map("idempotency_key") @db.VarChar(128)
+  userId         String    @map("user_id") @db.Uuid
+  endpoint       String    @db.VarChar(128)
+  requestHash    String    @map("request_hash") @db.VarChar(64)
+  status         String    @db.VarChar(32) // PROCESSING, COMPLETED, FAILED
+  responseStatus Int?      @map("response_status")
+  responseBody   String?   @map("response_body") @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  completedAt    DateTime? @map("completed_at") @db.Timestamptz
+
+  @@map("idempotency_records")
+}
+
+model AuditEvent {
+  id            String   @id @default(uuid()) @db.Uuid
+  eventType     String   @map("event_type") @db.VarChar(64)
+  actorUserId   String?  @map("actor_user_id") @db.Uuid
+  actorUsername String?  @map("actor_username") @db.VarChar(64)
+  targetId      String?  @map("target_id") @db.VarChar(128)
+  actionStatus  String   @map("action_status") @db.VarChar(32)
+  ipAddress     String?  @map("ip_address") @db.VarChar(45)
+  correlationId String?  @map("correlation_id") @db.VarChar(64)
+  metadataJson  String?  @map("metadata_json") @db.Text
+  timestamp     DateTime @default(now()) @db.Timestamptz
+
+  @@map("audit_events")
+}
+
+model RiskFlag {
+  id          String    @id @default(uuid()) @db.Uuid
+  targetType  String    @map("target_type") @db.VarChar(32)
+  targetId    String    @map("target_id") @db.VarChar(64)
+  riskScore   Int       @map("risk_score")
+  reason      String    @db.VarChar(255)
+  severity    String    @db.VarChar(32) // LOW, MEDIUM, HIGH, CRITICAL
+  resolved    Boolean   @default(false)
+  resolvedAt  DateTime? @map("resolved_at") @db.Timestamptz
+  resolvedBy  String?   @map("resolved_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("risk_flags")
+}
+
+model AccountAdjustmentRequest {
+  id          String    @id @default(uuid()) @db.Uuid
+  accountId   String    @map("account_id") @db.Uuid
+  amount      Decimal   @db.Decimal(19, 4)
+  entryType   String    @map("entry_type") @db.VarChar(8) // DEBIT or CREDIT
+  reason      String    @db.VarChar(255)
+  status      String    @default("PENDING") @db.VarChar(32) // PENDING, APPROVED, REJECTED
+  requestedBy String    @map("requested_by") @db.Uuid
+  reviewedBy  String?   @map("reviewed_by") @db.Uuid
+  reviewedAt  DateTime? @map("reviewed_at") @db.Timestamptz
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  account   Account @relation(fields: [accountId], references: [id])
+  requester User    @relation("AdjustmentRequester", fields: [requestedBy], references: [id])
+  reviewer  User?   @relation("AdjustmentReviewer", fields: [reviewedBy], references: [id])
+
+  @@map("account_adjustment_requests")
+}

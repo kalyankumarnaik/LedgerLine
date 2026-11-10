@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Building,
   KeyRound,
+  Sparkles,
 } from 'lucide-react';
 
 export const DepositPage: React.FC = () => {
@@ -28,7 +29,7 @@ export const DepositPage: React.FC = () => {
   useEffect(() => {
     const fetchAccounts = async () => {
       const data = await accountService.getMyAccounts();
-      const active = data.filter(a => a.status === 'ACTIVE');
+      const active = data.filter((a) => a.status === 'ACTIVE');
       setAccounts(active);
       if (active.length > 0) setAccountId(active[0].id);
     };
@@ -37,7 +38,14 @@ export const DepositPage: React.FC = () => {
   }, []);
 
   const generateKey = () => {
-    setIdempotencyKey(`IDEMP-DEP-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
+    setIdempotencyKey(
+      `IDEMP-DEP-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`
+    );
+  };
+
+  const handleAddAmount = (addVal: number) => {
+    const current = parseFloat(amount || '0');
+    setAmount((current + addVal).toFixed(2));
   };
 
   const handleDeposit = async (e: React.FormEvent) => {
@@ -64,7 +72,7 @@ export const DepositPage: React.FC = () => {
       generateKey();
       // refresh account balances
       const data = await accountService.getMyAccounts();
-      setAccounts(data.filter(a => a.status === 'ACTIVE'));
+      setAccounts(data.filter((a) => a.status === 'ACTIVE'));
     } catch (err: any) {
       setError(err.message || 'Deposit failed.');
     } finally {
@@ -80,13 +88,20 @@ export const DepositPage: React.FC = () => {
       className="max-w-2xl mx-auto space-y-6"
     >
       <div>
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Deposit Funds</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            Deposit Funds
+          </h1>
+          <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-700 text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
+            <Sparkles className="w-3 h-3 text-emerald-500" /> Reserve Backed
+          </span>
+        </div>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
           Fund your account securely. Balanced against the LedgerLine Central Clearing Reserve.
         </p>
       </div>
 
-      <Card>
+      <Card className="border border-emerald-200/80 dark:border-navy-800 card-glow-emerald">
         {error && (
           <div className="mb-5 p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -95,13 +110,17 @@ export const DepositPage: React.FC = () => {
         )}
 
         {/* Accounting Invariant Notice */}
-        <div className="mb-6 p-4 rounded-xl bg-violet-50/60 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/50 text-xs text-slate-600 dark:text-slate-300 space-y-1">
-          <div className="font-bold text-violet-800 dark:text-violet-300 flex items-center gap-1.5">
-            <Building className="w-4 h-4" />
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 to-teal-50/40 dark:from-emerald-950/30 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-800/60 text-xs text-slate-600 dark:text-slate-300 space-y-1.5">
+          <div className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+            <Building className="w-4 h-4 text-emerald-600" />
             <span>Authorized Funding Simulation Model</span>
           </div>
-          <p>
-            In strict compliance with double-entry principles, deposits debit the Reserve Clearing Account (<code className="font-mono text-violet-600 dark:text-violet-400">SYS-CLEARING-INR-001</code>) and credit your account. Money is never created out of thin air.
+          <p className="leading-relaxed">
+            In strict compliance with double-entry principles, deposits debit the Reserve Clearing Account (
+            <code className="font-mono text-emerald-700 dark:text-emerald-400 font-bold">
+              SYS-CLEARING-INR-001
+            </code>
+            ) and credit your account. Money is never created out of thin air.
           </p>
         </div>
 
@@ -113,11 +132,12 @@ export const DepositPage: React.FC = () => {
             <select
               value={accountId}
               onChange={(e) => setAccountId(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-navy-850 border border-slate-300 dark:border-navy-700 rounded-xl text-sm font-medium text-slate-900 dark:text-white"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-navy-850 border border-slate-300 dark:border-navy-700 rounded-xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               {accounts.map((acc) => (
                 <option key={acc.id} value={acc.id}>
-                  {acc.name} ({acc.accountNumber}) — Current Balance: ₹{acc.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  {acc.name} ({acc.accountNumber}) — Current Balance: ₹
+                  {acc.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </option>
               ))}
             </select>
@@ -127,16 +147,35 @@ export const DepositPage: React.FC = () => {
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Deposit Amount (INR ₹)
             </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 10000.00"
-              required
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-navy-850 border border-slate-300 dark:border-navy-700 rounded-xl text-lg font-black text-slate-900 dark:text-white"
-            />
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-slate-400">
+                ₹
+              </span>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="10000.00"
+                required
+                className="w-full pl-9 pr-4 py-3 bg-slate-50 dark:bg-navy-850 border border-slate-300 dark:border-navy-700 rounded-xl text-xl font-black text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+
+            {/* Quick Amount Pills */}
+            <div className="flex flex-wrap items-center gap-2 mt-2.5">
+              {[1000, 5000, 10000, 25000, 50000].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => handleAddAmount(val)}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 hover:bg-emerald-100 transition-colors"
+                >
+                  +₹{val.toLocaleString('en-IN')}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>
@@ -148,15 +187,19 @@ export const DepositPage: React.FC = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="e.g. Salary direct deposit or wire transfer"
-              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-navy-850 border border-slate-300 dark:border-navy-700 rounded-xl text-sm font-medium text-slate-900 dark:text-white"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-navy-850 border border-slate-300 dark:border-navy-700 rounded-xl text-sm font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
-          <div className="p-3.5 bg-slate-50 dark:bg-navy-850 border border-slate-200 dark:border-navy-800 rounded-xl flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2">
-              <KeyRound className="w-4 h-4 text-emerald-500" />
+          <div className="p-3.5 bg-slate-50 dark:bg-navy-850 border border-slate-200 dark:border-navy-800 rounded-2xl flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <KeyRound className="w-4 h-4" />
+              </div>
               <div>
-                <span className="font-bold text-slate-700 dark:text-slate-200 block">Idempotency Protection</span>
+                <span className="font-bold text-slate-700 dark:text-slate-200 block">
+                  SHA-256 Idempotency Protection
+                </span>
                 <span className="font-mono text-[10px] text-slate-400">{idempotencyKey}</span>
               </div>
             </div>
@@ -169,8 +212,14 @@ export const DepositPage: React.FC = () => {
             </button>
           </div>
 
-          <Button type="submit" variant="emerald" size="lg" loading={loading} className="w-full">
-            <ArrowDownToLine className="w-4 h-4 mr-2" /> Complete Deposit
+          <Button
+            type="submit"
+            variant="emerald"
+            size="lg"
+            loading={loading}
+            className="w-full shadow-lg shadow-emerald-500/25 py-3.5 text-base"
+          >
+            <ArrowDownToLine className="w-4.5 h-4.5 mr-2" /> Complete Deposit
           </Button>
         </form>
       </Card>

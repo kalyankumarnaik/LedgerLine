@@ -32,8 +32,8 @@ const INITIAL_USERS: User[] = [
   {
     id: 'usr-admin-001',
     username: 'admin',
-    email: 'admin@ledgerline.com',
-    fullName: 'Platform Administrator',
+    email: 'admin@balancevault.com',
+    fullName: 'BalanceVault Administrator',
     enabled: true,
     roles: ['ROLE_ADMIN'],
     createdAt: '2026-01-01T00:00:00Z',
@@ -114,7 +114,7 @@ const INITIAL_ACCOUNTS: Account[] = [
     id: 'acc-sys-clearing',
     accountNumber: 'SYS-CLEARING-INR-001',
     userId: 'usr-admin-001',
-    ownerName: 'LedgerLine System Clearing',
+    ownerName: 'BalanceVault System Clearing',
     name: 'Central Clearing Reserve',
     accountType: 'SYSTEM_CLEARING',
     status: 'ACTIVE',
@@ -1007,7 +1007,7 @@ class MockEngine {
       entries = entries.filter((e) => new Date(e.createdAt) <= new Date(toDate));
     }
 
-    let csv = `LedgerLine Official Account Statement\n`;
+    let csv = `BalanceVault Official Account Statement\n`;
     csv += `Account Number: ${acc.accountNumber}\n`;
     csv += `Account Name: ${acc.name}\n`;
     csv += `Owner: ${acc.ownerName}\n`;

@@ -55,15 +55,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       >
         {/* Brand Header */}
         <div className="h-16 flex items-center gap-3 px-6 border-b border-slate-200 dark:border-navy-800">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-navy-900 via-violet-brand to-emerald-brand flex items-center justify-center text-white shadow-md shadow-violet-500/20">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-emerald-500 flex items-center justify-center text-white shadow-md shadow-violet-500/20">
             <Scale className="w-5 h-5 text-white" />
           </div>
           <div>
             <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
-              Ledger<span className="text-violet-brand">Line</span>
+              Balance<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-brand to-emerald-brand">Vault</span>
             </span>
             <span className="block text-[10px] uppercase font-bold tracking-widest text-emerald-500">
-              Verified Core
+              Provable Ledger
             </span>
           </div>
         </div>

@@ -53,6 +53,77 @@
   100% { transform: translateX(100%); }
 }
 
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.05); }
+}
+
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-float {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-gentle 4s ease-in-out 2s infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-flow 6s ease infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Card Glow Utilities */
+.card-glow-violet {
+  box-shadow: 0 12px 32px -8px rgba(124, 58, 237, 0.25);
+}
+.card-glow-emerald {
+  box-shadow: 0 12px 32px -8px rgba(16, 185, 129, 0.25);
+}
+.card-glow-rose {
+  box-shadow: 0 12px 32px -8px rgba(244, 63, 94, 0.25);
+}
+.card-glow-amber {
+  box-shadow: 0 12px 32px -8px rgba(245, 158, 11, 0.25);
+}
+.card-glow-sky {
+  box-shadow: 0 12px 32px -8px rgba(14, 165, 233, 0.25);
+}
+
+/* Digital Bank Card Gradients */
+.card-debit-violet {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4c1d95 80%, #6d28d9 100%);
+}
+
+.card-debit-emerald {
+  background: linear-gradient(135deg, #022c22 0%, #064e3b 45%, #065f46 80%, #047857 100%);
+}
+
+.card-debit-sapphire {
+  background: linear-gradient(135deg, #082f49 0%, #0c4a6e 40%, #0369a1 80%, #0284c7 100%);
+}
+
+.card-debit-amber {
+  background: linear-gradient(135deg, #451a03 0%, #78350f 40%, #92400e 80%, #b45309 100%);
+}
+
+.card-debit-obsidian {
+  background: linear-gradient(135deg, #090d16 0%, #111827 50%, #1f2937 100%);
+}
+
 .animate-shimmer {
   position: relative;
   overflow: hidden;
