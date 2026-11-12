@@ -1,47 +1,82 @@
 -- ============================================================================
 -- BalanceVault Migration V4: Principle of Least Privilege Database Roles
 -- Defines specialized PostgreSQL roles: App, Auditor, Bootstrap Operator, Owner
+-- Engineered to work seamlessly across local, Docker, and cloud databases (Render, Neon, RDS)
 -- ============================================================================
 
--- 1. Create specialized database roles if they do not exist
+-- 1. Create specialized database roles if permitted by the database engine
 DO $$
+DECLARE
+    v_db_name TEXT := current_database();
 BEGIN
     -- Operational Application Role (DML only, no DDL/DROP)
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_app') THEN
-        CREATE ROLE bv_app WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
-    END IF;
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_app') THEN
+            CREATE ROLE bv_app WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
+        END IF;
+    EXCEPTION WHEN insufficient_privilege THEN
+        RAISE NOTICE 'Skipping CREATE ROLE bv_app due to cloud database privileges';
+    END;
 
     -- Read-Only Auditor Role (Zero writes, immutable audit inspection)
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_auditor') THEN
-        CREATE ROLE bv_auditor WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
-    END IF;
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_auditor') THEN
+            CREATE ROLE bv_auditor WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
+        END IF;
+    EXCEPTION WHEN insufficient_privilege THEN
+        RAISE NOTICE 'Skipping CREATE ROLE bv_auditor due to cloud database privileges';
+    END;
 
     -- Bootstrap Operator Role (Permitted only to invoke admin bootstrap functions)
-    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_bootstrap_operator') THEN
-        CREATE ROLE bv_bootstrap_operator WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_bootstrap_operator') THEN
+            CREATE ROLE bv_bootstrap_operator WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT;
+        END IF;
+    EXCEPTION WHEN insufficient_privilege THEN
+        RAISE NOTICE 'Skipping CREATE ROLE bv_bootstrap_operator due to cloud database privileges';
+    END;
+
+    -- 2. Grant permissions dynamically on current_database() to bv_app if role exists
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_app') THEN
+        BEGIN
+            EXECUTE format('GRANT CONNECT ON DATABASE %I TO bv_app', v_db_name);
+            EXECUTE 'GRANT USAGE ON SCHEMA public TO bv_app';
+            EXECUTE 'GRANT SELECT, INSERT, UPDATE ON TABLE users, accounts, account_balances, account_permissions,
+                transaction_limits, financial_transactions, journal_entries, ledger_entries,
+                idempotency_records, audit_events, risk_flags, account_adjustment_requests TO bv_app';
+            EXECUTE 'GRANT SELECT ON TABLE roles, user_roles TO bv_app';
+            EXECUTE 'REVOKE DELETE ON TABLE journal_entries, ledger_entries, audit_events FROM bv_app';
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Granting permissions to bv_app skipped: %', SQLERRM;
+        END;
+    END IF;
+
+    -- 3. Grant permissions dynamically to bv_auditor if role exists
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_auditor') THEN
+        BEGIN
+            EXECUTE format('GRANT CONNECT ON DATABASE %I TO bv_auditor', v_db_name);
+            EXECUTE 'GRANT USAGE ON SCHEMA public TO bv_auditor';
+            EXECUTE 'GRANT SELECT, INSERT, UPDATE ON TABLE users, accounts, account_balances, account_permissions,
+                financial_transactions, journal_entries, ledger_entries, audit_events,
+                risk_flags, account_adjustment_requests TO bv_auditor';
+            EXECUTE 'REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON ALL TABLES IN SCHEMA public FROM bv_auditor';
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Granting permissions to bv_auditor skipped: %', SQLERRM;
+        END;
+    END IF;
+
+    -- 4. Grant permissions dynamically to bv_bootstrap_operator if role exists
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_bootstrap_operator') THEN
+        BEGIN
+            EXECUTE format('GRANT CONNECT ON DATABASE %I TO bv_bootstrap_operator', v_db_name);
+            EXECUTE 'GRANT USAGE ON SCHEMA public TO bv_bootstrap_operator';
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Granting permissions to bv_bootstrap_operator skipped: %', SQLERRM;
+        END;
     END IF;
 END $$;
 
--- 2. Grant permissions to bv_app (Business Transactions)
-GRANT CONNECT ON DATABASE ledgerline TO bv_app;
-GRANT USAGE ON SCHEMA public TO bv_app;
-GRANT SELECT, INSERT, UPDATE ON TABLE users, accounts, account_balances, account_permissions,
-    transaction_limits, financial_transactions, journal_entries, ledger_entries,
-    idempotency_records, audit_events, risk_flags, account_adjustment_requests TO bv_app;
-GRANT SELECT ON TABLE roles, user_roles TO bv_app;
--- Explicitly revoke DELETE on immutable ledger and journal entries
-REVOKE DELETE ON TABLE journal_entries, ledger_entries, audit_events FROM bv_app;
-
--- 3. Grant permissions to bv_auditor (Read-Only Independent Oversight)
-GRANT CONNECT ON DATABASE ledgerline TO bv_auditor;
-GRANT USAGE ON SCHEMA public TO bv_auditor;
-GRANT SELECT ON TABLE users, roles, user_roles, accounts, account_balances,
-    financial_transactions, journal_entries, ledger_entries, audit_events,
-    risk_flags, account_adjustment_requests TO bv_auditor;
--- Revoke all mutations from auditor
-REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON ALL TABLES IN SCHEMA public FROM bv_auditor;
-
--- 4. Secure First-Admin Bootstrap Function
+-- 5. Secure First-Admin Bootstrap Function
 CREATE OR REPLACE FUNCTION public.bootstrap_admin_user(
     p_username VARCHAR(64),
     p_email VARCHAR(255),
@@ -108,6 +143,15 @@ BEGIN
 END;
 $$;
 
--- Grant execution of bootstrap function to bootstrap operator
-REVOKE ALL ON FUNCTION public.bootstrap_admin_user FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.bootstrap_admin_user TO bv_bootstrap_operator;
+-- 6. Grant execution of bootstrap function to bootstrap operator if role exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT FROM pg_roles WHERE rolname = 'bv_bootstrap_operator') THEN
+        BEGIN
+            REVOKE ALL ON FUNCTION public.bootstrap_admin_user FROM PUBLIC;
+            EXECUTE 'GRANT EXECUTE ON FUNCTION public.bootstrap_admin_user TO bv_bootstrap_operator';
+        EXCEPTION WHEN OTHERS THEN
+            RAISE NOTICE 'Function grant to bv_bootstrap_operator skipped: %', SQLERRM;
+        END;
+    END IF;
+END $$;
