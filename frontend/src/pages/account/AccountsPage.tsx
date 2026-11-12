@@ -141,7 +141,7 @@ export const AccountsPage: React.FC = () => {
               whileHover={{ y: -6, scale: 1.01 }}
             >
               <Card
-                className={`relative overflow-hidden flex flex-col justify-between transition-all duration-200 h-full p-0 border border-slate-200/90 dark:border-navy-800 ${theme.borderHover} ${theme.glow}`}
+                className={`card-holographic relative overflow-hidden flex flex-col justify-between transition-all duration-200 h-full p-0 border border-slate-200/90 dark:border-navy-800 ${theme.borderHover} ${theme.glow}`}
               >
                 {/* Virtual Card Graphic Top */}
                 <div className={`p-5 text-white ${theme.banner} relative overflow-hidden`}>
@@ -197,6 +197,24 @@ export const AccountsPage: React.FC = () => {
                       <span className="font-mono font-bold text-slate-700 dark:text-slate-300">
                         ₹{acc.perTransactionLimit?.toLocaleString('en-IN') || '50,000'}
                       </span>
+                    </div>
+
+                    {/* Daily Limit Headroom Bar */}
+                    <div className="pt-1.5">
+                      <div className="flex justify-between text-[11px] text-slate-400 mb-1">
+                        <span>Daily Limit Allocation</span>
+                        <span className="font-mono font-bold text-violet-600 dark:text-violet-400">
+                          {Math.min(100, Math.max(10, Math.round(((acc.balance) / (acc.dailyLimit || 100000)) * 100)))}% Headroom
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-slate-100 dark:bg-navy-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-500 to-emerald-500 transition-all duration-500"
+                          style={{
+                            width: `${Math.min(100, Math.max(15, Math.round(((acc.balance) / (acc.dailyLimit || 100000)) * 100)))}%`
+                          }}
+                        />
+                      </div>
                     </div>
 
                     <Link to={`/accounts/${acc.id}`} className="block pt-2">

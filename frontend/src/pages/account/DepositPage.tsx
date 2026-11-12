@@ -97,7 +97,7 @@ export const DepositPage: React.FC = () => {
           </span>
         </div>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          Fund your account securely. Balanced against the LedgerLine Central Clearing Reserve.
+          Fund your account securely. Balanced against the BalanceVault Central Clearing Reserve.
         </p>
       </div>
 

@@ -142,7 +142,7 @@ export const LandingPage: React.FC = () => {
           className="mt-6 text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight max-w-4xl mx-auto leading-[1.1] text-slate-900 dark:text-white"
         >
           Every movement accounted for. <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-fuchsia-500 via-sky-500 to-emerald-400 dark:from-violet-400 dark:via-fuchsia-300 dark:to-emerald-300">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 via-fuchsia-500 via-sky-500 to-emerald-400 dark:from-violet-400 dark:via-fuchsia-300 dark:to-emerald-300 animate-gradient inline-block">
             Every balance proven.
           </span>
         </motion.h1>
@@ -371,7 +371,7 @@ export const LandingPage: React.FC = () => {
           <motion.div
             whileHover={{ y: -6 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="p-8 rounded-3xl bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border border-slate-200 dark:border-navy-800 shadow-sm hover:shadow-xl hover:border-violet-400/80 dark:hover:border-violet-600/80 transition-all"
+            className="card-holographic p-8 rounded-3xl bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border border-slate-200 dark:border-navy-800 shadow-sm hover:shadow-xl hover:border-violet-400/80 dark:hover:border-violet-600/80 transition-all card-glow-violet"
           >
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-600 text-white flex items-center justify-center mb-6 shadow-md shadow-violet-500/25">
               <Scale className="w-6 h-6" />
@@ -385,7 +385,7 @@ export const LandingPage: React.FC = () => {
           <motion.div
             whileHover={{ y: -6 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="p-8 rounded-3xl bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border border-slate-200 dark:border-navy-800 shadow-sm hover:shadow-xl hover:border-emerald-400/80 dark:hover:border-emerald-600/80 transition-all"
+            className="card-holographic p-8 rounded-3xl bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border border-slate-200 dark:border-navy-800 shadow-sm hover:shadow-xl hover:border-emerald-400/80 dark:hover:border-emerald-600/80 transition-all card-glow-emerald"
           >
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white flex items-center justify-center mb-6 shadow-md shadow-emerald-500/25">
               <Lock className="w-6 h-6" />
@@ -399,7 +399,7 @@ export const LandingPage: React.FC = () => {
           <motion.div
             whileHover={{ y: -6 }}
             transition={{ type: 'spring', stiffness: 350, damping: 25 }}
-            className="p-8 rounded-3xl bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border border-slate-200 dark:border-navy-800 shadow-sm hover:shadow-xl hover:border-sky-400/80 dark:hover:border-sky-600/80 transition-all"
+            className="card-holographic p-8 rounded-3xl bg-white/90 dark:bg-navy-900/90 backdrop-blur-md border border-slate-200 dark:border-navy-800 shadow-sm hover:shadow-xl hover:border-sky-400/80 dark:hover:border-sky-600/80 transition-all card-glow-sky"
           >
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 text-white flex items-center justify-center mb-6 shadow-md shadow-sky-500/25">
               <Fingerprint className="w-6 h-6" />

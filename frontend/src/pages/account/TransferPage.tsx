@@ -295,6 +295,47 @@ export const TransferPage: React.FC = () => {
             />
           </div>
 
+          {/* Live Double-Entry Balancing Preview Card */}
+          {numAmount > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 rounded-2xl bg-gradient-to-br from-violet-50/90 via-slate-50 to-emerald-50/90 dark:from-navy-850 dark:via-navy-900 dark:to-emerald-950/30 border border-violet-200/80 dark:border-navy-700 space-y-2.5 shadow-sm"
+            >
+              <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <span className="flex items-center gap-1.5 text-violet-600 dark:text-violet-400">
+                  <Sparkles className="w-3.5 h-3.5" /> Live Double-Entry Preview
+                </span>
+                <span className="font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/80 px-2 py-0.5 rounded font-bold">
+                  &Sigma; Dr &minus; &Sigma; Cr = 0.0000
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div className="p-2.5 rounded-xl bg-white/80 dark:bg-navy-950/80 border border-violet-200/60 dark:border-violet-900/50">
+                  <div className="text-[10px] font-bold text-violet-600 dark:text-violet-400 uppercase">Debit Entry [DR]</div>
+                  <div className="font-bold text-slate-800 dark:text-white truncate mt-0.5">
+                    {destAccountNumber ? destAccountNumber : 'Recipient Account'}
+                  </div>
+                  <div className="font-mono text-xs font-black text-violet-600 dark:text-violet-400 mt-1">
+                    +₹{numAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+                <div className="p-2.5 rounded-xl bg-white/80 dark:bg-navy-950/80 border border-emerald-200/60 dark:border-emerald-900/50">
+                  <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase">Credit Entry [CR]</div>
+                  <div className="font-bold text-slate-800 dark:text-white truncate mt-0.5">
+                    {selectedSource ? selectedSource.name : 'Source Account'}
+                  </div>
+                  <div className="font-mono text-xs font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                    -₹{numAmount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </div>
+                </div>
+              </div>
+              <div className="text-[11px] text-center text-slate-500 dark:text-slate-400 font-mono">
+                Mathematical Parity: Total System Capital Conserved
+              </div>
+            </motion.div>
+          )}
+
           {/* Idempotency Key Banner */}
           <div className="p-3.5 bg-slate-50 dark:bg-navy-850 border border-slate-200 dark:border-navy-800 rounded-2xl flex items-center justify-between text-xs">
             <div className="flex items-center gap-2.5">

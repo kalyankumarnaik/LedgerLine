@@ -180,3 +180,21 @@ This log documents key development milestones, AI assistance, architectural assu
   6. Implemented `HealthCheckController` for `/health/liveness` and `/health/readiness`.
   7. Updated `THREATS.md`, `API_DOCUMENTATION.md`, and `README.md`.
 - **Relevant Git milestone:** `milestone/balancevault-realignment-and-mandatory-features` (Pending manual commit)
+
+---
+
+### Entry 13: 2026-11-12 — Holographic FinTech UI Enhancements, Live Double-Entry Preview & Dynamic Limit Visualizations
+- **Task assigned to AI:** Upgrade website styling, animations, and color schemes so the application looks visually attractive, modern, and engaging for evaluation, while ensuring zero build or deployment errors.
+- **AI-generated implementation:** Initial styling lacked interactive double-entry mathematical previews and holographic lighting on card elements.
+- **Specific issue or incorrect assumption discovered:**
+  1. Transfer pages in traditional banking apps hide the double-entry accounting mechanics behind generic success messages; evaluators could not visually see debits balancing credits prior to transaction execution.
+  2. Digital debit cards lacked interactive depth cues and limit utilization feedback.
+  3. Deep subpages (Login, Register, Transfer) had brand discrepancies ("Sign In to LedgerLine" instead of "BalanceVault").
+- **How the implementation was verified:** Executed `npm run build` in root and verified zero TypeScript and Vite bundle errors across all components.
+- **What correction was made:**
+  1. In `TransferPage.tsx`: Integrated a real-time reactive mathematical double-entry preview card that dynamically computes and visualizes `[Dr] Destination Account (+₹X)` and `[Cr] Source Account (-₹X)` with conservation of value indicator ($\sum \text{Dr} - \sum \text{Cr} = 0.0000$) before submission.
+  2. In `AccountsPage.tsx`: Added `.card-holographic` hover sweep sheen, dynamic multi-chromatic gradient themes per account type, and real-time daily limit allocation capacity bars.
+  3. In `index.css`: Added `@keyframes spin-slow`, `@keyframes aurora`, `@keyframes pulse-scale`, `.card-holographic`, `.text-gradient-aurora`, and glowing neon border badge utilities.
+  4. In `LandingPage.tsx`: Added `.animate-gradient` headline flow, holographic guarantee cards, and multi-chromatic background mesh glows.
+  5. In `LoginPage.tsx` & `RegisterPage.tsx`: Fixed all branding to BalanceVault and integrated ambient floating light orbs.
+- **Relevant Git milestone:** `milestone/holographic-fintech-styling-and-live-math-preview` (Pending manual commit)

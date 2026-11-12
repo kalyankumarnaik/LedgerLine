@@ -124,6 +124,90 @@
   background: linear-gradient(135deg, #090d16 0%, #111827 50%, #1f2937 100%);
 }
 
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes aurora {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-scale {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-aurora {
+  background-size: 300% 300%;
+  animation: aurora 12s ease infinite;
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 2.5s ease-in-out infinite;
+}
+
+/* Holographic Card Sheen */
+.card-holographic {
+  position: relative;
+  overflow: hidden;
+}
+.card-holographic::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+.card-holographic:hover::before {
+  opacity: 1;
+}
+
+/* Gradient Text Utilities */
+.text-gradient-aurora {
+  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 50%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-cyber-violet {
+  background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-neon-emerald {
+  background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Neon Glow Badges */
+.badge-glow-emerald {
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
+}
+.badge-glow-violet {
+  box-shadow: 0 0 14px rgba(124, 58, 237, 0.35);
+}
+.badge-glow-rose {
+  box-shadow: 0 0 14px rgba(244, 63, 94, 0.35);
+}
+.badge-glow-amber {
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
+}
+.badge-glow-sky {
+  box-shadow: 0 0 14px rgba(14, 165, 233, 0.35);
+}
+
 .animate-shimmer {
   position: relative;
   overflow: hidden;

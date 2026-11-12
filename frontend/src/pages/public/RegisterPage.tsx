@@ -40,7 +40,9 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-slate-50 dark:bg-navy-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden transition-colors">
       {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-violet-600/10 via-emerald-500/10 to-transparent blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-violet-600/20 via-fuchsia-500/15 to-emerald-500/15 blur-[140px] pointer-events-none -z-10 animate-pulse-glow" />
+      <div className="absolute bottom-10 left-10 w-[350px] h-[350px] bg-gradient-to-br from-cyan-500/15 to-blue-600/10 blur-[130px] pointer-events-none -z-10 animate-float" />
+      <div className="absolute top-10 right-10 w-[350px] h-[350px] bg-gradient-to-bl from-emerald-500/15 to-teal-600/10 blur-[130px] pointer-events-none -z-10 animate-float-delayed" />
 
       <motion.div
         initial={{ opacity: 0, y: -16 }}
@@ -53,7 +55,7 @@ export const RegisterPage: React.FC = () => {
             <Scale className="w-6 h-6 text-white" />
           </div>
           <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            Ledger<span className="text-violet-brand">Line</span>
+            Balance<span className="text-violet-brand">Vault</span>
           </span>
         </Link>
         <h2 className="mt-4 text-2xl font-black text-slate-900 dark:text-white tracking-tight">Create an Account</h2>
