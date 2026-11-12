@@ -35,8 +35,7 @@ public class Account {
     @Column(nullable = false, length = 3)
     private String currency = "INR";
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private AccountBalance accountBalance;
+
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
@@ -75,8 +74,7 @@ public class Account {
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
 
-    public AccountBalance getAccountBalance() { return accountBalance; }
-    public void setAccountBalance(AccountBalance accountBalance) { this.accountBalance = accountBalance; }
+
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
