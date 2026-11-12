@@ -39,7 +39,66 @@ In your Vercel Project Settings > **Environment Variables**, you can configure:
 
 ---
 
-## 2. Quick Start With Docker Compose
+## 2. Deploying the Backend to Render
+
+Render is ideal for hosting the Spring Boot 3 + PostgreSQL backend using our pre-configured Docker image.
+
+### Step 1: Create a PostgreSQL Database on Render
+1. Log into your [Render Dashboard](https://dashboard.render.com).
+2. Click **New +** and choose **PostgreSQL**.
+3. Fill in:
+   - **Name:** `balancevault-postgres`
+   - **Database:** `ledgerline`
+   - **User:** `postgres`
+   - **Region:** Choose the region closest to your users (e.g., `Oregon (US West)` or `Frankfurt (EU Central)`).
+   - **Plan:** Free
+4. Click **Create Database**.
+5. Once created, keep the database page open. You will need:
+   - **Host** (e.g. `dpg-xxxxxx.oregon-postgres.render.com`)
+   - **Database** (`ledgerline`)
+   - **Username** (`postgres`)
+   - **Password** (click to reveal)
+
+### Step 2: Deploy the Backend Web Service on Render
+1. In Render, click **New +** and select **Web Service**.
+2. Connect your Git repository containing BalanceVault.
+3. Configure the service settings:
+   - **Name:** `balancevault-backend`
+   - **Region:** *Select the same region as your database* (e.g. Oregon).
+   - **Language / Runtime:** **Docker**
+   - **Branch:** `main`
+   - **Root Directory:** Leave empty (or `./`)
+   - **Dockerfile Path:** `Dockerfile` (Render detects the root `Dockerfile` automatically)
+   - **Instance Type:** Free
+
+4. Scroll down to **Environment Variables** and add the following keys:
+
+| Key | Value / Instructions |
+| :--- | :--- |
+| `SPRING_DATASOURCE_URL` | `jdbc:postgresql://<RENDER_DB_HOST>:5432/ledgerline?sslmode=require` *(Replace `<RENDER_DB_HOST>` with your Render DB Host)* |
+| `SPRING_DATASOURCE_USERNAME` | `postgres` (or your Render DB username) |
+| `SPRING_DATASOURCE_PASSWORD` | *(Paste your Render DB password)* |
+| `JWT_SECRET` | `404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970` |
+| `CORS_ALLOWED_ORIGINS` | `https://*.vercel.app,http://localhost:5173,http://localhost:3000` |
+| `SERVER_PORT` | `8080` |
+
+5. Under **Advanced**:
+   - **Health Check Path:** `/health/liveness`
+
+6. Click **Create Web Service**.
+   Render will build the multi-stage Docker container (compiling with Java 21 & Maven) and start Spring Boot with Flyway applying all 4 database migrations automatically.
+
+### Step 3: Connect Frontend (Vercel) to Render Backend
+Once Render finishes deploying, copy your live backend URL (e.g., `https://balancevault-backend.onrender.com`):
+1. Go to your **Vercel Project Dashboard** -> **Settings** -> **Environment Variables**.
+2. Add or update:
+   - **Key:** `VITE_API_URL`
+   - **Value:** `https://balancevault-backend.onrender.com`
+3. Click **Redeploy** on Vercel so the frontend picks up the live backend API.
+
+---
+
+## 3. Quick Start With Docker Compose
 
 To run the full native stack (PostgreSQL 16, Redis 7, Spring Boot 3 Backend, React + Nginx Frontend) in Docker:
 
