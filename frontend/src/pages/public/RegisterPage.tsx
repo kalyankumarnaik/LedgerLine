@@ -38,9 +38,9 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-50 dark:bg-navy-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden transition-colors">
+    <div className="relative min-h-screen bg-navy-950 text-slate-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background ambient lighting */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-violet-600/20 via-fuchsia-500/15 to-emerald-500/15 blur-[140px] pointer-events-none -z-10 animate-pulse-glow" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-gradient-to-tr from-emerald-600/20 via-cyan-500/15 to-violet-500/15 blur-[140px] pointer-events-none -z-10 animate-pulse-glow" />
       <div className="absolute bottom-10 left-10 w-[350px] h-[350px] bg-gradient-to-br from-cyan-500/15 to-blue-600/10 blur-[130px] pointer-events-none -z-10 animate-float" />
       <div className="absolute top-10 right-10 w-[350px] h-[350px] bg-gradient-to-bl from-emerald-500/15 to-teal-600/10 blur-[130px] pointer-events-none -z-10 animate-float-delayed" />
 
@@ -51,17 +51,17 @@ export const RegisterPage: React.FC = () => {
         className="sm:mx-auto sm:w-full sm:max-w-md text-center"
       >
         <Link to="/" className="inline-flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-navy-900 via-violet-brand to-emerald-brand flex items-center justify-center text-white shadow-lg shadow-violet-500/20 group-hover:scale-105 transition-transform">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-violet-500/30 group-hover:scale-105 transition-transform">
             <Scale className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            Balance<span className="text-violet-brand">Vault</span>
+          <span className="text-2xl font-black tracking-tight text-white">
+            Balance<span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-emerald-400">Vault</span>
           </span>
         </Link>
-        <h2 className="mt-4 text-2xl font-black text-slate-900 dark:text-white tracking-tight">Create an Account</h2>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        <h2 className="mt-4 text-2xl font-black text-white tracking-tight">Create an Account</h2>
+        <p className="mt-1 text-xs text-slate-400">
           Already have an account?{' '}
-          <Link to="/login" className="font-semibold text-violet-brand hover:underline">
+          <Link to="/login" className="font-semibold text-emerald-400 hover:underline">
             Sign in
           </Link>
         </p>
@@ -73,7 +73,7 @@ export const RegisterPage: React.FC = () => {
         transition={{ duration: 0.4, delay: 0.1 }}
         className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
       >
-        <div className="bg-white/95 dark:bg-navy-900/95 backdrop-blur-xl py-8 px-6 sm:px-10 shadow-fintech-lg rounded-2xl border border-slate-200/90 dark:border-navy-800">
+        <div className="bg-navy-900/95 backdrop-blur-xl py-8 px-6 sm:px-10 shadow-2xl rounded-3xl border border-emerald-500/30 card-glow-emerald card-holographic">
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -8 }}
