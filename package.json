@@ -8,7 +8,7 @@
     "dev": "cd frontend && npm run dev",
     "start": "cd frontend && npm run preview",
     "preview": "cd frontend && npm run preview",
-    "db:generate": "npx prisma generate",
+    "db:generate": "node scripts/db-generate.js",
     "db:migrate": "node -e \"console.log('PostgreSQL migrations verified across Flyway & Prisma.')\"",
     "bootstrap:admin": "powershell -ExecutionPolicy Bypass -File ./bootstrap-admin.ps1"
   },
